@@ -18,7 +18,7 @@ Modified chat tutorial from `https://github.com/gorilla/websocket`
 #### Frontend
 
 1. `cd frontend`
-2. `npm install`
+2. `npm install`  
 3. `npm start`
 
 #### Backend
