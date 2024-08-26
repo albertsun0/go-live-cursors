@@ -3,7 +3,6 @@ package main
 import "github.com/google/uuid"
 
 type PublishMessage struct {
-	UserID  uuid.UUID
 	RoomID string
 	Action string
 	MouseX int
