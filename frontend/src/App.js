@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Cursor from "./Cursor";
-const BASE_URL = "localhost:8080";
+
 function App() {
   const [cursors, setCursors] = useState([]);
   const [uuid, setUuid] = useState(null);

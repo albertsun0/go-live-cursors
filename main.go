@@ -26,6 +26,7 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	log.Println("Server starting on port 8080")
 	flag.Parse()
 	hub := newHub()
 	go hub.run()
