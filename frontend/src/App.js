@@ -35,7 +35,6 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <div>hi</div>
         {cursors.map((cursor) => (
           <Cursor
             key={cursor.UserID}
