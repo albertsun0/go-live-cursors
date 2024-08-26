@@ -2,7 +2,16 @@
 
 Smooth live cursors implementation using `gorilla` websockets
 
-Modified version of chat tutorial from `https://github.com/gorilla/websocket`
+![cursors gif](cursors.gif)
+
+Modified chat tutorial from `https://github.com/gorilla/websocket`
+
+## Technical Details
+
+- On user join, spawn a thread handling the user's `ws` connection, assinging uuid to user/connection
+- On frontend cursor move, send a message containing updated cursor locations
+- Spawn a thread with a timer to broadcast message containing all cursor locations every ~20 ms
+- On the frontend use spring animation to smooth cursors
 
 ### Running 
 
