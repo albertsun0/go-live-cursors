@@ -6,7 +6,7 @@ function App() {
   const [uuid, setUuid] = useState(null);
 
   useEffect(() => {
-    const conn = new WebSocket("ws://localhost:8080/ws");
+    const conn = new WebSocket("ws://salty-maddy-testing-doshy-org-2dfc446e.koyeb.app/ws");
     conn.onmessage = function (evt) {
       const parse = JSON.parse(evt.data);
       if (parse.Action === "subscribe") {
