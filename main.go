@@ -1,57 +1,40 @@
+// Copyright 2013 The Gorilla WebSocket Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package main
 
 import (
-	"context"
+	"flag"
 	"log"
-	"net"
 	"net/http"
-	"os"
-	"os/signal"
-	"time"
 )
 
-func main() {
-	log.SetFlags(0)
+var addr = flag.String("addr", ":8080", "http service address")
 
-	err := run()
-	if err != nil {
-		log.Fatal(err)
+func serveHome(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL)
+	if r.URL.Path != "/" {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
 	}
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	http.ServeFile(w, r, "home.html")
 }
 
-const DEFAULT_ADDRESS = "localhost:8080"
-
-// run initializes the chatServer and then
-// starts a http.Server for the passed in address.
-func run() error {
-	l, err := net.Listen("tcp", DEFAULT_ADDRESS)
+func main() {
+	flag.Parse()
+	hub := newHub()
+	go hub.run()
+	http.HandleFunc("/", serveHome)
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		serveWs(hub, w, r)
+	})
+	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
-		return err
+		log.Fatal("ListenAndServe: ", err)
 	}
-	log.Printf("listening on ws://%v", l.Addr())
-
-	cs := newChatServer()
-	s := &http.Server{
-		Handler:      cs,
-		ReadTimeout:  time.Second * 10,
-		WriteTimeout: time.Second * 10,
-	}
-	
-	errc := make(chan error, 1)
-	go func() {
-		errc <- s.Serve(l)
-	}()
-
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, os.Interrupt)
-	select {
-	case err := <-errc:
-		log.Printf("failed to serve: %v", err)
-	case sig := <-sigs:
-		log.Printf("terminating: %v", sig)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
-	return s.Shutdown(ctx)
 }

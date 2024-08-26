@@ -6,14 +6,14 @@ type PublishMessage struct {
 	UserID  uuid.UUID
 	RoomID string
 	Action string
-	MouseX int16
-	MouseY int16
+	MouseX int
+	MouseY int
 }
 
 type MousePosition struct {
 	UserID uuid.UUID
-	MouseX int16
-	MouseY int16
+	MouseX int
+	MouseY int
 }
 
 type BroadcastMessage struct {
@@ -22,11 +22,11 @@ type BroadcastMessage struct {
 	Body []*MousePosition
 }
 
-func handleMessage(cs *chatServer, message PublishMessage) error {
+func handleMessage(hub * Hub, c *Client, message PublishMessage) error {
 
 	if message.Action == "move" {
-		cs.subscribers[message.UserID].mouseX = message.MouseX
-		cs.subscribers[message.UserID].mouseY = message.MouseY
+		c.mouseX = message.MouseX
+		c.mouseY = message.MouseY
 	}
 
 	return nil
