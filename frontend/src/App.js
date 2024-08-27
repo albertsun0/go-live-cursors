@@ -12,7 +12,7 @@ function App() {
 
   useEffect(() => {
     const conn = new WebSocket(
-      "ws://salty-maddy-testing-doshy-org-2dfc446e.koyeb.app/ws"
+      "wss://salty-maddy-testing-doshy-org-2dfc446e.koyeb.app/ws"
     );
     conn.onmessage = function (evt) {
       const parse = JSON.parse(evt.data);
