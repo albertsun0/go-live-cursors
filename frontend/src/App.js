@@ -1,12 +1,19 @@
 import { useState, useEffect } from "react";
 import Cursor from "./Cursor";
 
+const cursorColors = ["red", "blue", "green", "purple"];
+
+const getRandomColor = (hash) => {
+  return cursorColors[hash.charCodeAt(hash.length - 1) % cursorColors.length];
+};
 function App() {
   const [cursors, setCursors] = useState([]);
   const [uuid, setUuid] = useState(null);
 
   useEffect(() => {
-    const conn = new WebSocket("ws://salty-maddy-testing-doshy-org-2dfc446e.koyeb.app/ws");
+    const conn = new WebSocket(
+      "ws://salty-maddy-testing-doshy-org-2dfc446e.koyeb.app/ws"
+    );
     conn.onmessage = function (evt) {
       const parse = JSON.parse(evt.data);
       if (parse.Action === "subscribe") {
@@ -32,13 +39,17 @@ function App() {
     });
   }, []);
 
+  if (!uuid) {
+    return <div>Connecting...</div>;
+  }
+
   return (
     <div className="App">
       <header className="App-header">
         {cursors.map((cursor) => (
           <Cursor
             key={cursor.UserID}
-            color={"blue"}
+            color={getRandomColor(cursor.UserID)}
             x={cursor.MouseX}
             y={cursor.MouseY}
           />
