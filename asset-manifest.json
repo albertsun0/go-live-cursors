@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/go-live-cursors/static/css/main.252963a4.css",
-    "main.js": "/go-live-cursors/static/js/main.85270e82.js",
+    "main.js": "/go-live-cursors/static/js/main.7e1d6aee.js",
     "index.html": "/go-live-cursors/index.html",
     "main.252963a4.css.map": "/go-live-cursors/static/css/main.252963a4.css.map",
-    "main.85270e82.js.map": "/go-live-cursors/static/js/main.85270e82.js.map"
+    "main.7e1d6aee.js.map": "/go-live-cursors/static/js/main.7e1d6aee.js.map"
   },
   "entrypoints": [
     "static/css/main.252963a4.css",
-    "static/js/main.85270e82.js"
+    "static/js/main.7e1d6aee.js"
   ]
 }
