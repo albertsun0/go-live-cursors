@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Cursor from "./Cursor";
 
 const cursorColors = ["red", "blue", "green", "purple"];
@@ -9,26 +9,40 @@ const getRandomColor = (hash) => {
 function App() {
   const [cursors, setCursors] = useState([]);
   const [uuid, setUuid] = useState(null);
+  const ws = useRef(null);
 
   useEffect(() => {
-    const conn = new WebSocket(
-      "wss://salty-maddy-testing-doshy-org-2dfc446e.koyeb.app/ws"
-    );
-    conn.onmessage = function (evt) {
+    ws.current = new WebSocket("ws://localhost:8080/ws");
+    ws.current.onopen = () => console.log("ws opened");
+    ws.current.onclose = () => console.log("ws closed");
+
+    const wsCurrent = ws.current;
+
+    return () => {
+      wsCurrent.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!ws.current) {
+      return;
+    }
+    ws.current.onmessage = (evt) => {
       const parse = JSON.parse(evt.data);
       if (parse.Action === "subscribe") {
         setUuid(parse.Msg);
         console.log("subscribe", uuid);
         return;
-      }
-      if (parse.Action === "tick") {
+      } else if (parse.Action === "tick") {
         setCursors(parse.Body);
+      } else {
+        console.log(parse);
       }
     };
 
     document.addEventListener("mousemove", (e) => {
-      console.log(e.pageX, e.pageY);
-      conn.send(
+      // console.log(e.pageX, e.pageY);
+      ws.current.send(
         JSON.stringify({
           Action: "move",
           RoomID: "test",
@@ -39,6 +53,15 @@ function App() {
     });
   }, []);
 
+  const sendMessage = (action, RoomID) => {
+    ws.current.send(
+      JSON.stringify({
+        Action: action,
+        RoomID: RoomID,
+      })
+    );
+  };
+
   if (!uuid) {
     return <div>Connecting...</div>;
   }
@@ -46,6 +69,13 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
+        <h1>Live Cursors</h1>
+        <button onClick={() => sendMessage("createRoom", "test")}>
+          Create room test
+        </button>
+        <button onClick={() => sendMessage("joinRoom", "test")}>
+          join room test
+        </button>
         {cursors.map((cursor) => (
           <Cursor
             key={cursor.UserID}

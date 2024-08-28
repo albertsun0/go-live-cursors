@@ -15,6 +15,8 @@ import (
 
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
+
+
 type Hub struct {
 	// Registered clients.
 	clients map[uuid.UUID] *Client
@@ -27,6 +29,10 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	unregister chan *Client
+	
+	mainLobby *Hub
+
+	rooms map[string] * Hub
 }
 
 func newHub() *Hub {
@@ -35,6 +41,8 @@ func newHub() *Hub {
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[uuid.UUID] * Client),
+		mainLobby:  nil,
+		rooms : make(map[string] * Hub),
 	}
 }
 
@@ -93,8 +101,9 @@ func (h *Hub) run() {
 		case client := <-h.unregister:
 			if _, ok := h.clients[client.UserID]; ok {
 				delete(h.clients, client.UserID)
-				close(client.send)
+				// close(client.send)
 			}
+			// if hub is not main lobby and empty, remove it
 		case message := <-h.broadcast:
 			for client := range h.clients {
 				select {

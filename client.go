@@ -139,6 +139,20 @@ func (c *Client) writePump() {
 	}
 }
 
+func (c *Client) sendMessage(Action string, Msg string) {
+	joinMsg := BroadcastMessage{
+		Action: Action,
+		Msg:   Msg,
+	}
+
+	parsedResponse, err := json.Marshal(joinMsg)
+	if err != nil {
+		log.Println(err)
+	}
+
+	c.send <- []byte(parsedResponse)
+}
+
 // serveWs handles websocket requests from the peer.
 func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	uuid := uuid.New()
