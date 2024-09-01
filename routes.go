@@ -22,7 +22,7 @@ type MousePosition struct {
 type BroadcastMessage struct {
 	Action string
 	Msg    string
-	Body []*MousePosition
+	Body any
 }
 
 
@@ -68,7 +68,7 @@ func handleMessage(hub * Hub, c *Client, message PublishMessage) error {
 			c.hub.register <- c
 
 			// send success
-			c.sendMessage("success", "Joined Room " + roomID)
+			c.sendMessage("joinSuccess", roomID)
 		}
 	}
 

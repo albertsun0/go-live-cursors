@@ -11,6 +11,8 @@ function App() {
   const [uuid, setUuid] = useState(null);
   const ws = useRef(null);
 
+  const [rooms, setRooms] = useState([]);
+
   useEffect(() => {
     ws.current = new WebSocket("ws://localhost:8080/ws");
     ws.current.onopen = () => console.log("ws opened");
@@ -35,6 +37,8 @@ function App() {
         return;
       } else if (parse.Action === "tick") {
         setCursors(parse.Body);
+      } else if (parse.Action === "rooms") {
+        setRooms(parse.Body);
       } else {
         console.log(parse);
       }
@@ -54,6 +58,7 @@ function App() {
   }, []);
 
   const sendMessage = (action, RoomID) => {
+    console.log("sending", action, RoomID);
     ws.current.send(
       JSON.stringify({
         Action: action,
@@ -67,24 +72,34 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Live Cursors</h1>
-        <button onClick={() => sendMessage("createRoom", "test")}>
-          Create room test
-        </button>
-        <button onClick={() => sendMessage("joinRoom", "test")}>
-          join room test
-        </button>
-        {cursors.map((cursor) => (
-          <Cursor
-            key={cursor.UserID}
-            color={getRandomColor(cursor.UserID)}
-            x={cursor.MouseX}
-            y={cursor.MouseY}
-          />
+    <div className="p-10 space-y-4">
+      <h1 className="text-2xl">Live Cursors</h1>
+      <div
+        onClick={() => sendMessage("createRoom", "test")}
+        className="bg-blue-100 "
+      >
+        Create room test
+      </div>
+      <h2 className="text-xl">Rooms</h2>
+      <div>
+        {rooms.map((room) => (
+          <div
+            onClick={() => sendMessage("joinRoom", room.RoomName)}
+            key={room.RoomName}
+            className="bg-blue-100 cursor-pointer"
+          >
+            {room.RoomName} {room.NumUsers}
+          </div>
         ))}
-      </header>
+      </div>
+      {cursors.map((cursor) => (
+        <Cursor
+          key={cursor.UserID}
+          color={getRandomColor(cursor.UserID)}
+          x={cursor.MouseX}
+          y={cursor.MouseY}
+        />
+      ))}
     </div>
   );
 }

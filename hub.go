@@ -33,6 +33,13 @@ type Hub struct {
 	mainLobby *Hub
 
 	rooms map[string] * Hub
+
+	ticks int64
+}
+
+type RoomInfo struct {
+	RoomName string
+	NumUsers int
 }
 
 func newHub() *Hub {
@@ -43,6 +50,7 @@ func newHub() *Hub {
 		clients:    make(map[uuid.UUID] * Client),
 		mainLobby:  nil,
 		rooms : make(map[string] * Hub),
+		ticks: 0,
 	}
 }
 
@@ -72,6 +80,32 @@ func (hub *Hub) publishPositions() {
 	hub.sendAll(parsedResponse)
 }
 
+func (hub *Hub) sendRooms() {
+	var rooms []*RoomInfo
+
+	for s:= range hub.rooms {
+		log.Println((s))
+		curRoom := RoomInfo{
+			RoomName: s,
+			NumUsers: len(hub.rooms[s].clients),
+		}
+		rooms = append(rooms, &curRoom)
+	}
+
+	message := BroadcastMessage{
+		Action: "rooms",
+		Msg: "",
+		Body: rooms,
+	}
+
+	parsedResponse, err := json.Marshal(message)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("SEND ROOMS " + string(parsedResponse))
+	hub.sendAll(parsedResponse)
+}
+
 func (h *Hub) sendAll(message []byte) {
 	for client := range h.clients {
 		select {
@@ -83,16 +117,21 @@ func (h *Hub) sendAll(message []byte) {
 	}
 }
 
-func (h *Hub) tick(ticker *time.Ticker) {
+func (h *Hub) tickMouse(ticker *time.Ticker) {
 	for range ticker.C {
-		h.publishPositions()
+		h.ticks++
+		if h.mainLobby == nil && h.ticks % 100 == 0 {
+			h.sendRooms()
+		} else{
+			h.publishPositions()
+		}
 	}
 }
 
 func (h *Hub) run() {
 	ticker := time.NewTicker(50 * time.Millisecond)
-	go h.tick(ticker)
-	
+	go h.tickMouse(ticker)
+
 	for {
 		select {
 		case client := <-h.register:

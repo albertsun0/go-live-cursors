@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 export default function Cursor({ color, x, y }) {
   return (
     <motion.div
+      className="pointer-events-none"
       style={{
         position: "absolute",
         top: "0",
