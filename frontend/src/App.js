@@ -79,7 +79,7 @@ function App() {
   }
 
   return (
-    <div className="p-10 space-y-4">
+    <div className="p-10 space-y-4 overflow-hidden w-full h-full">
       <h1 className="text-2xl font-bold text-gray-800">{currentRoom}</h1>
       {currentRoom === "Lobby" && (
         <div>
