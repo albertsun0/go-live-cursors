@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,6 +19,7 @@ import (
 
 
 type Hub struct {
+	mu sync.Mutex
 	// Registered clients.
 	clients map[uuid.UUID] *Client
 
@@ -44,6 +46,7 @@ type RoomInfo struct {
 
 func newHub() *Hub {
 	return &Hub{
+		mu: sync.Mutex{},
 		broadcast:  make(chan []byte),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
@@ -84,7 +87,6 @@ func (hub *Hub) sendRooms() {
 	var rooms []*RoomInfo
 
 	for s:= range hub.rooms {
-		log.Println((s))
 		curRoom := RoomInfo{
 			RoomName: s,
 			NumUsers: len(hub.rooms[s].clients),
@@ -102,7 +104,7 @@ func (hub *Hub) sendRooms() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("SEND ROOMS " + string(parsedResponse))
+	// fmt.Println("SEND ROOMS " + string(parsedResponse))
 	hub.sendAll(parsedResponse)
 }
 

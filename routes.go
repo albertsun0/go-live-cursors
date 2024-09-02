@@ -41,33 +41,38 @@ func handleMessage(hub * Hub, c *Client, message PublishMessage) error {
 	}
 
 	if message.Action == "createRoom" {
+		if hub.mainLobby != nil {
+			c.sendMessage("error", "Must be in main lobby to create room")
+			return nil
+		}
 		// Create new room if not exist
 		if hub.rooms[roomID] == nil {
+			hub.mu.Lock()
 			newRoom := newHub()
-			newRoom.mainLobby = mainLobby
+			newRoom.mainLobby = hub
 			go newRoom.run()
 			hub.rooms[roomID] = newRoom
 			log.Println("Created room " + roomID)
+			c.sendMessage("success", "Created Room " + roomID)
+			hub.mu.Unlock()
+		} else{
+			c.sendMessage("error", "Room " + roomID + " already exists")
 		}
 
-		// Join room
-		// c.hub.unregister <- c
-		// c.hub = hub.rooms[roomID]
-		// c.hub.register <- c
-
-		// // send success
-		c.sendMessage("success", "Created Room " + roomID)
+		hub.sendRooms()
 	}
 
 	if message.Action == "joinRoom" {
-		if hub.rooms[roomID] == nil {
+		if mainLobby.rooms[roomID] == nil {
 			c.sendMessage("error", "Room " + roomID + " does not exist")
 		} else {
+
 			c.hub.unregister <- c
-			c.hub = hub.rooms[roomID]
+			c.hub = mainLobby.rooms[roomID]
 			c.hub.register <- c
 
 			// send success
+			log.Println("User " + c.UserID.String() + " joined room " + roomID)
 			c.sendMessage("joinSuccess", roomID)
 		}
 	}

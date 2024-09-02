@@ -13,6 +13,10 @@ function App() {
 
   const [rooms, setRooms] = useState([]);
 
+  const [roomInput, setRoomInput] = useState("");
+
+  const [currentRoom, setCurrentRoom] = useState("Lobby");
+
   useEffect(() => {
     ws.current = new WebSocket("ws://localhost:8080/ws");
     ws.current.onopen = () => console.log("ws opened");
@@ -39,6 +43,9 @@ function App() {
         setCursors(parse.Body);
       } else if (parse.Action === "rooms") {
         setRooms(parse.Body);
+      } else if (parse.Action === "joinSuccess") {
+        setCurrentRoom(parse.Msg);
+        setRooms([]);
       } else {
         console.log(parse);
       }
@@ -73,31 +80,47 @@ function App() {
 
   return (
     <div className="p-10 space-y-4">
-      <h1 className="text-2xl">Live Cursors</h1>
-      <div
-        onClick={() => sendMessage("createRoom", "test")}
-        className="bg-blue-100 "
-      >
-        Create room test
-      </div>
-      <h2 className="text-xl">Rooms</h2>
-      <div>
-        {rooms.map((room) => (
-          <div
-            onClick={() => sendMessage("joinRoom", room.RoomName)}
-            key={room.RoomName}
-            className="bg-blue-100 cursor-pointer"
-          >
-            {room.RoomName} {room.NumUsers}
+      <h1 className="text-2xl font-bold text-gray-800">{currentRoom}</h1>
+      {currentRoom === "Lobby" && (
+        <div>
+          <div className="flex flex-row space-x-4">
+            <input
+              className="border-2"
+              value={roomInput}
+              onChange={(e) => setRoomInput(e.target.value)}
+            />
+            <button
+              className="bg-blue-300 p-2 rounded-sm"
+              onClick={() => {
+                sendMessage("createRoom", roomInput);
+                setRoomInput("");
+              }}
+            >
+              Create Room
+            </button>
           </div>
-        ))}
-      </div>
+          <h2 className="text-xl">Rooms</h2>
+          <div className="space-y-1">
+            {rooms &&
+              rooms.map((room) => (
+                <div
+                  onClick={() => sendMessage("joinRoom", room.RoomName)}
+                  key={room.RoomName}
+                  className="bg-blue-100 cursor-pointer"
+                >
+                  {room.RoomName} {room.NumUsers}
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
       {cursors.map((cursor) => (
         <Cursor
           key={cursor.UserID}
           color={getRandomColor(cursor.UserID)}
           x={cursor.MouseX}
           y={cursor.MouseY}
+          name={cursor.UserID === uuid ? "You" : cursor.UserID}
         />
       ))}
     </div>
